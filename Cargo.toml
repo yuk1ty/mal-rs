@@ -1,0 +1,13 @@
+[package]
+name = "mal_rs"
+version = "0.1.0"
+authors = ["Yuki Toyoda <toyoda_yuki@cyberagent.co.jp>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+[[bin]]
+name = "step0"
+path = "src/quux/step0_repl.rs"
