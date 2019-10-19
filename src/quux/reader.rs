@@ -1,3 +1,5 @@
+use crate::quux::types::MalType;
+use crate::quux::{raise_err, MalResult};
 use regex::Regex;
 
 #[derive(Debug)]
@@ -6,9 +8,9 @@ pub struct Reader {
     pub pos: usize,
 }
 
-pub fn read_str(expr: &str) -> () {
+pub fn read_str(expr: &str) -> MalResult {
     let tokens = tokenize(expr);
-    read_form(Reader::new(tokens));
+    read_form(&mut Reader::new(tokens))
 }
 
 fn tokenize(expr: &str) -> Vec<String> {
@@ -29,8 +31,111 @@ fn tokenize(expr: &str) -> Vec<String> {
     result
 }
 
-fn read_form(reader: Reader) -> () {
-    unimplemented!()
+fn read_form(reader: &mut Reader) -> MalResult {
+    let maybe_expr = reader.peek();
+    if maybe_expr.is_none() {
+        return raise_err("There is no tokens");
+    }
+
+    match &maybe_expr.unwrap()[..] {
+        "'" => {
+            reader.next();
+            Ok(MalType::List(
+                Box::new(vec![MalType::Symbol("quote".to_string())]),
+                Box::new(read_form(reader)?),
+            ))
+        }
+        "`" => {
+            reader.next();
+            Ok(MalType::List(
+                Box::new(vec![MalType::Symbol("quasiquote".to_string())]),
+                Box::new(read_form(reader)?),
+            ))
+        }
+        "~" => {
+            reader.next();
+            Ok(MalType::List(
+                Box::new(vec![MalType::Symbol("unquote".to_string())]),
+                Box::new(read_form(reader)?),
+            ))
+        }
+        "~@" => {
+            reader.next();
+            Ok(MalType::List(
+                Box::new(vec![MalType::Symbol("splice-unquote".to_string())]),
+                Box::new(read_form(reader)?),
+            ))
+        }
+        "^" => {
+            reader.next();
+            let meta = read_form(reader)?;
+            Ok(MalType::List(
+                Box::new(vec![MalType::Symbol("meta".to_string())]),
+                Box::new(meta),
+            ))
+        }
+        "@" => {
+            reader.next();
+            Ok(MalType::List(
+                Box::new(vec![MalType::Symbol("deref".to_string())]),
+                Box::new(read_form(reader)?),
+            ))
+        }
+        ")" => raise_err("unexpected )"),
+        "(" => read_list(reader, ")"),
+        "]" => raise_err("unexpected ]"),
+        "[" => unimplemented!(),
+        "}" => raise_err("unexpected }"),
+        "{" => unimplemented!(),
+        _ => raise_err("tmp_err"),
+    }
+}
+
+fn read_list(reader: &mut Reader, end: &str) -> MalResult {
+    let mut ast: Vec<MalType> = Vec::new();
+    reader.next();
+
+    loop {
+        let token = match reader.peek() {
+            Some(t) => t,
+            None => panic!("naito omoukedo"),
+        };
+        if &token == end {
+            break;
+        }
+        ast.push(read_form(reader)?)
+    }
+
+    reader.next();
+
+    match end {
+        ")" => Ok(MalType::List(Box::new(ast), Box::new(MalType::Nil))),
+        _ => raise_err("unimplemented!"),
+    }
+}
+
+fn read_atom(reader: &mut Reader) -> MalResult {
+    lazy_static! {
+        static ref INT_REX: Regex = Regex::new(r"^-?[0-9]+$").unwrap();
+        static ref STR_REX: Regex = Regex::new(r#""(?:\\.|[^\\"])*""#).unwrap();
+    }
+
+    let token = reader.next();
+    match token {
+        Some(t) => match &t[..] {
+            "nil" => Ok(MalType::Nil),
+            _ => {
+                if INT_REX.is_match(&t) {
+                    unimplemented!()
+                } else if STR_REX.is_match(&t) {
+                    unimplemented!()
+                } else {
+                    Ok(MalType::Symbol(t))
+                }
+            }
+        },
+        None => raise_err("There is no token in read_atom"),
+    }
 }
 
 pub trait ReaderOps {
@@ -62,7 +167,8 @@ impl ReaderOps for Reader {
 #[cfg(test)]
 mod tests {
 
-    use crate::quux::reader::{tokenize, Reader, ReaderOps};
+    use crate::quux::reader::{read_form, tokenize, Reader, ReaderOps};
+    use crate::quux::types::MalType;
 
     #[test]
     fn next_peek_works() {
