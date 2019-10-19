@@ -1,4 +1,4 @@
-use regex::{Captures, Regex};
+use regex::Regex;
 
 #[derive(Debug)]
 pub struct Reader {
@@ -62,10 +62,10 @@ impl ReaderOps for Reader {
 #[cfg(test)]
 mod tests {
 
-    use crate::quux::reader::{Reader, ReaderOps};
+    use crate::quux::reader::{tokenize, Reader, ReaderOps};
 
     #[test]
-    fn it_works() {
+    fn next_peek_works() {
         let mut reader = Reader::new(
             vec!["t", "o", "k", "e", "n", "s"]
                 .iter()
@@ -84,5 +84,21 @@ mod tests {
         assert_eq!("n".to_string(), reader.next().unwrap());
         assert_eq!("s".to_string(), reader.peek().unwrap());
         assert_eq!("s".to_string(), reader.next().unwrap());
+    }
+
+    #[test]
+    fn tokenize_works() {
+        {
+            let tokens = tokenize("abc bcd def");
+            assert_eq!(vec!["abc", "bcd", "def"], tokens);
+        }
+        {
+            let tokens = tokenize("abc; never read");
+            assert_eq!(vec!["abc"], tokens);
+        }
+        {
+            let tokens = tokenize("( 1 + 2 )");
+            assert_eq!(vec!["(", "1", "+", "2", ")"], tokens);
+        }
     }
 }
