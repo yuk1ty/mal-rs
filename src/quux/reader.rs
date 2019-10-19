@@ -209,4 +209,58 @@ mod tests {
             assert_eq!(vec!["(", "1", "+", "2", ")"], tokens);
         }
     }
+
+    #[test]
+    fn read_form_works() {
+        {
+            let ast = read_form(&mut Reader::new(tokenize("123")));
+            assert_eq!(MalType::Int("123".to_string()), ast.unwrap());
+        }
+        {
+            let ast = read_form(&mut Reader::new(tokenize("123 ")));
+            assert_eq!(MalType::Int("123".to_string()), ast.unwrap());
+        }
+        {
+            let ast = read_form(&mut Reader::new(tokenize("abc")));
+            assert_eq!(MalType::Symbol("abc".to_string()), ast.unwrap());
+        }
+        {
+            let ast = read_form(&mut Reader::new(tokenize("abc ")));
+            assert_eq!(MalType::Symbol("abc".to_string()), ast.unwrap());
+        }
+        {
+            let ast = read_form(&mut Reader::new(tokenize("(123 456)")));
+            assert_eq!(
+                MalType::List(
+                    Box::new(vec![
+                        MalType::Int("123".to_string()),
+                        MalType::Int("456".to_string())
+                    ]),
+                    Box::new(MalType::Nil)
+                ),
+                ast.unwrap()
+            );
+        }
+        {
+            let ast = read_form(&mut Reader::new(tokenize("( + 2 (* 3 4) )")));
+            assert_eq!(
+                MalType::List(
+                    Box::new(vec![
+                        MalType::Symbol("+".to_string()),
+                        MalType::Int("2".to_string()),
+                        MalType::List(
+                            Box::new(vec![
+                                MalType::Symbol("*".to_string()),
+                                MalType::Int("3".to_string()),
+                                MalType::Int("4".to_string())
+                            ]),
+                            Box::new(MalType::Nil)
+                        )
+                    ]),
+                    Box::new(MalType::Nil)
+                ),
+                ast.unwrap()
+            );
+        }
+    }
 }
