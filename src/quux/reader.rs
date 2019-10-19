@@ -1,3 +1,5 @@
+use regex::{Captures, Regex};
+
 #[derive(Debug)]
 pub struct Reader {
     pub tokens: Vec<String>,
@@ -10,7 +12,21 @@ pub fn read_str(expr: &str) -> () {
 }
 
 fn tokenize(expr: &str) -> Vec<String> {
-    unimplemented!()
+    lazy_static! {
+        static ref REX: Regex = Regex::new(
+            r###"[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)"###
+        )
+        .unwrap();
+    }
+
+    let mut result = vec![];
+    for cap in REX.captures_iter(expr) {
+        if cap[1].starts_with(";") {
+            continue;
+        }
+        result.push(String::from(&cap[1]));
+    }
+    result
 }
 
 fn read_form(reader: Reader) -> () {
