@@ -84,10 +84,10 @@ fn read_form(reader: &mut Reader) -> MalResult {
         ")" => raise_err("unexpected )"),
         "(" => read_list(reader, ")"),
         "]" => raise_err("unexpected ]"),
-        "[" => unimplemented!(),
+        "[" => read_list(reader, "]"),
         "}" => raise_err("unexpected }"),
-        "{" => unimplemented!(),
-        _ => raise_err("tmp_err"),
+        "{" => read_list(reader, "}"),
+        _ => read_atom(reader),
     }
 }
 
@@ -110,6 +110,8 @@ fn read_list(reader: &mut Reader, end: &str) -> MalResult {
 
     match end {
         ")" => Ok(MalType::List(Box::new(ast), Box::new(MalType::Nil))),
+        "]" => Ok(MalType::Vector(Box::new(ast), Box::new(MalType::Nil))),
+        "}" => Ok(MalType::HashMap(Box::new(ast), Box::new(MalType::Nil))),
         _ => raise_err("unimplemented!"),
     }
 }
@@ -126,9 +128,9 @@ fn read_atom(reader: &mut Reader) -> MalResult {
             "nil" => Ok(MalType::Nil),
             _ => {
                 if INT_REX.is_match(&t) {
-                    unimplemented!()
+                    Ok(MalType::Int(t))
                 } else if STR_REX.is_match(&t) {
-                    unimplemented!()
+                    Ok(MalType::String(t))
                 } else {
                     Ok(MalType::Symbol(t))
                 }
