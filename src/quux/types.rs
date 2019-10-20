@@ -3,7 +3,7 @@ use crate::quux::printer::Printer;
 #[derive(Debug, PartialEq, Clone)]
 pub enum MalType {
     Nil,
-    Int(String),
+    Int(i32),
     String(String),
     Bool(bool),
     Symbol(String),
@@ -18,7 +18,7 @@ impl MalType {
     }
 
     pub fn int(s: &str) -> MalType {
-        MalType::Int(s.to_string())
+        MalType::Int(s.parse().unwrap())
     }
 
     pub fn string(s: &str) -> MalType {

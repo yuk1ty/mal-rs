@@ -216,11 +216,11 @@ mod tests {
     fn read_form_works() {
         {
             let ast = read_form(&mut Reader::new(tokenize("123")));
-            assert_eq!(MalType::Int("123".to_string()), ast.unwrap());
+            assert_eq!(MalType::Int(123), ast.unwrap());
         }
         {
             let ast = read_form(&mut Reader::new(tokenize("123 ")));
-            assert_eq!(MalType::Int("123".to_string()), ast.unwrap());
+            assert_eq!(MalType::Int(123), ast.unwrap());
         }
         {
             let ast = read_form(&mut Reader::new(tokenize("abc")));
@@ -235,8 +235,8 @@ mod tests {
             assert_eq!(
                 MalType::List(
                     Box::new(vec![
-                        MalType::Int("123".to_string()),
-                        MalType::Int("456".to_string())
+                        MalType::Int(123),
+                        MalType::Int(456)
                     ]),
                     Box::new(MalType::Nil)
                 ),
@@ -249,12 +249,12 @@ mod tests {
                 MalType::List(
                     Box::new(vec![
                         MalType::Symbol("+".to_string()),
-                        MalType::Int("2".to_string()),
+                        MalType::Int(2),
                         MalType::List(
                             Box::new(vec![
                                 MalType::Symbol("*".to_string()),
-                                MalType::Int("3".to_string()),
-                                MalType::Int("4".to_string())
+                                MalType::Int(3),
+                                MalType::Int(4)
                             ]),
                             Box::new(MalType::Nil)
                         )
