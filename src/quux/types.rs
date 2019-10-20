@@ -1,3 +1,5 @@
+use crate::quux::printer::Printer;
+
 #[derive(Debug, PartialEq)]
 pub enum MalType {
     Nil,
@@ -45,5 +47,55 @@ impl MalType {
 
     pub fn hash_map(m: Vec<MalType>) -> MalType {
         MalType::HashMap(Box::new(m), Box::new(MalType::Nil))
+    }
+}
+
+impl Printer for MalType {
+    fn pr_str(&self) -> String {
+        fn strconv_vec(v: &Box<Vec<MalType>>, start: &str, end: &str) -> String {
+            let s: Vec<String> = (&**v).iter().map(|e| e.pr_str()).collect();
+            format!("{}{}{}", start, s.join(" "), end)
+        }
+
+        match self {
+            MalType::Nil => "nil".to_string(),
+            MalType::Symbol(s) => s.to_string(),
+            MalType::Int(i) => i.to_string(),
+            MalType::String(s) => s.to_string(),
+            MalType::Bool(b) => format!("{}", b),
+            MalType::List(l, _) => strconv_vec(l, "(", ")"),
+            MalType::Vector(l, _) => strconv_vec(l, "[", "]"),
+            MalType::HashMap(l, _) => strconv_vec(l, "{", "}"),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::quux::printer::Printer;
+    use crate::quux::types::MalType;
+
+    #[test]
+    fn pr_str_works() {
+        {
+            let ty = MalType::int("123");
+            assert_eq!("123", ty.pr_str());
+        }
+        {
+            let ty = MalType::completed_list(vec![MalType::int("123"), MalType::int("456")]);
+            assert_eq!("(123 456)", ty.pr_str());
+        }
+        {
+            let ty = MalType::completed_list(vec![
+                MalType::string("+"),
+                MalType::int("2"),
+                MalType::completed_list(vec![
+                    MalType::string("*"),
+                    MalType::int("3"),
+                    MalType::int("4"),
+                ]),
+            ]);
+            assert_eq!("(+ 2 (* 3 4))", ty.pr_str());
+        }
     }
 }
