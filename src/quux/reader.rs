@@ -40,45 +40,45 @@ fn read_form(reader: &mut Reader) -> MalResult {
     match &maybe_expr.unwrap()[..] {
         "'" => {
             reader.next();
-            Ok(MalType::List(
-                Box::new(vec![MalType::Symbol("quote".to_string())]),
-                Box::new(read_form(reader)?),
+            Ok(MalType::continuous_list(
+                vec![MalType::symbol("quote")],
+                read_form(reader)?,
             ))
         }
         "`" => {
             reader.next();
-            Ok(MalType::List(
-                Box::new(vec![MalType::Symbol("quasiquote".to_string())]),
-                Box::new(read_form(reader)?),
+            Ok(MalType::continuous_list(
+                vec![MalType::symbol("quasiquote")],
+                read_form(reader)?,
             ))
         }
         "~" => {
             reader.next();
-            Ok(MalType::List(
-                Box::new(vec![MalType::Symbol("unquote".to_string())]),
-                Box::new(read_form(reader)?),
+            Ok(MalType::continuous_list(
+                vec![MalType::symbol("unquote")],
+                read_form(reader)?,
             ))
         }
         "~@" => {
             reader.next();
-            Ok(MalType::List(
-                Box::new(vec![MalType::Symbol("splice-unquote".to_string())]),
-                Box::new(read_form(reader)?),
+            Ok(MalType::continuous_list(
+                vec![MalType::symbol("splice-unquote")],
+                read_form(reader)?,
             ))
         }
         "^" => {
             reader.next();
             let meta = read_form(reader)?;
-            Ok(MalType::List(
-                Box::new(vec![MalType::Symbol("meta".to_string())]),
-                Box::new(meta),
+            Ok(MalType::continuous_list(
+                vec![MalType::symbol("meta")],
+                meta,
             ))
         }
         "@" => {
             reader.next();
-            Ok(MalType::List(
-                Box::new(vec![MalType::Symbol("deref".to_string())]),
-                Box::new(read_form(reader)?),
+            Ok(MalType::continuous_list(
+                vec![MalType::symbol("deref")],
+                read_form(reader)?,
             ))
         }
         ")" => raise_err("unexpected )"),
@@ -109,9 +109,9 @@ fn read_list(reader: &mut Reader, end: &str) -> MalResult {
     reader.next();
 
     match end {
-        ")" => Ok(MalType::List(Box::new(ast), Box::new(MalType::Nil))),
-        "]" => Ok(MalType::Vector(Box::new(ast), Box::new(MalType::Nil))),
-        "}" => Ok(MalType::HashMap(Box::new(ast), Box::new(MalType::Nil))),
+        ")" => Ok(MalType::completed_list(ast)),
+        "]" => Ok(MalType::vector(ast)),
+        "}" => Ok(MalType::hash_map(ast)),
         _ => raise_err("unimplemented!"),
     }
 }
@@ -125,14 +125,14 @@ fn read_atom(reader: &mut Reader) -> MalResult {
     let token = reader.next();
     match token {
         Some(t) => match &t[..] {
-            "nil" => Ok(MalType::Nil),
+            "nil" => Ok(MalType::nil()),
             _ => {
                 if INT_REX.is_match(&t) {
-                    Ok(MalType::Int(t))
+                    Ok(MalType::int(&t))
                 } else if STR_REX.is_match(&t) {
-                    Ok(MalType::String(t))
+                    Ok(MalType::string(&t))
                 } else {
-                    Ok(MalType::Symbol(t))
+                    Ok(MalType::symbol(&t))
                 }
             }
         },
