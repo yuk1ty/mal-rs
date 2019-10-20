@@ -1,6 +1,6 @@
 use crate::quux::printer::Printer;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum MalType {
     Nil,
     Int(String),

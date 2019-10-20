@@ -12,8 +12,8 @@ lazy_static = "1.4.0"
 
 [[bin]]
 name = "step0"
-path = "src/quux/step0_repl.rs"
+path = "src/bin/step0_repl.rs"
 
 [[bin]]
 name = "step1"
-path = "src/quux/step1_repl.rs"
+path = "src/bin/step1_repl.rs"

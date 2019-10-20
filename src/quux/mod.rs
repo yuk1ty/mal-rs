@@ -3,8 +3,6 @@ use crate::quux::MalErr::ErrString;
 
 pub mod printer;
 pub mod reader;
-pub mod step0_repl;
-pub mod step1_repl;
 pub mod types;
 
 #[derive(Debug)]
