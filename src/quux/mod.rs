@@ -1,6 +1,7 @@
 use crate::quux::types::MalType;
 use crate::quux::MalErr::ErrString;
 
+pub mod env;
 pub mod printer;
 pub mod reader;
 pub mod types;

@@ -234,10 +234,7 @@ mod tests {
             let ast = read_form(&mut Reader::new(tokenize("(123 456)")));
             assert_eq!(
                 MalType::List(
-                    Box::new(vec![
-                        MalType::Int(123),
-                        MalType::Int(456)
-                    ]),
+                    Box::new(vec![MalType::Int(123), MalType::Int(456)]),
                     Box::new(MalType::Nil)
                 ),
                 ast.unwrap()

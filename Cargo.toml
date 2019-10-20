@@ -17,3 +17,7 @@ path = "src/bin/step0_repl.rs"
 [[bin]]
 name = "step1"
 path = "src/bin/step1_repl.rs"
+
+[[bin]]
+name = "step2"
+path = "src/bin/step2_eval.rs"
