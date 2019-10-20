@@ -126,6 +126,8 @@ fn read_atom(reader: &mut Reader) -> MalResult {
     match token {
         Some(t) => match &t[..] {
             "nil" => Ok(MalType::nil()),
+            "true" => Ok(MalType::bool(true)),
+            "false" => Ok(MalType::bool(false)),
             _ => {
                 if INT_REX.is_match(&t) {
                     Ok(MalType::int(&t))
